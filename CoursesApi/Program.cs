@@ -11,6 +11,7 @@ using CoursesApi.Data.DbContexts;
 using CoursesApi.Data.UnitOfWork;
 using CoursesApi.Mappings;
 using Microsoft.OpenApi.Models;
+using System.Reflection;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -36,10 +37,7 @@ builder.Services.AddApiVersioning(options =>
     options.AssumeDefaultVersionWhenUnspecified = true;
     options.DefaultApiVersion = new ApiVersion(1, 0);
     options.ReportApiVersions = true;
-    options.ApiVersionReader = ApiVersionReader.Combine(
-        new QueryStringApiVersionReader("api-version"),
-        new HeaderApiVersionReader("x-version"),
-        new MediaTypeApiVersionReader("ver"));
+    options.ApiVersionReader = new UrlSegmentApiVersionReader();
 }).AddApiExplorer(options =>
 {
     options.GroupNameFormat = "'v'VVV";
@@ -111,8 +109,13 @@ builder.Services.AddDbContext<CourseDbContext>(options =>
 
 builder.Services.AddScoped<IAuthRepository, SqlAuthRepository>();
 builder.Services.AddScoped<IAuthServices, AuthServices>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUnitOfWork, SqlDbContextUOW>();
 builder.Services.AddScoped<ICourseRepository, SqlCourseRepository>();
+
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(Assembly.GetExecutingAssembly());
+});
 
 // add auto mapper
 builder.Services.AddAutoMapper(typeof(AutoMapperProfiles));

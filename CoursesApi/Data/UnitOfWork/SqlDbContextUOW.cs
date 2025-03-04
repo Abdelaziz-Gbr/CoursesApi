@@ -3,11 +3,11 @@ using CoursesApi.Data.DbContexts;
 
 namespace CoursesApi.Data.UnitOfWork
 {
-    public class UnitOfWork : IUnitOfWork, IDisposable
+    public class SqlDbContextUOW : IUnitOfWork, IDisposable
     {
         private readonly CourseDbContext dbContext;
 
-        public UnitOfWork(CourseDbContext dbContext)
+        public SqlDbContextUOW(CourseDbContext dbContext)
         {
             this.dbContext = dbContext;
         }

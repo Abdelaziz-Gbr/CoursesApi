@@ -1,8 +1,10 @@
 ﻿using Asp.Versioning;
 using AutoMapper;
 using CoursesApi.Data.Repositories;
+using CoursesApi.Mediatr.Commands;
 using CoursesApi.Models.Data;
 using CoursesApi.Models.Dtos;
+using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -14,17 +16,11 @@ namespace CoursesApi.Controllers.v1
     [ApiVersion("1.0")]
     public class ServicesController : ControllerBase
     {
-        private readonly ICourseRepository courseRepository;
-        private readonly IMapper mapper;
-        private readonly ILogger logger;
+        private readonly ISender sender;
 
-        public ServicesController(ICourseRepository courseRepository, 
-            IMapper mapper,
-            ILogger<ServicesController> logger)
+        public ServicesController(ISender sender)
         {
-            this.courseRepository = courseRepository;
-            this.mapper = mapper;
-            this.logger = logger;
+            this.sender = sender;
         }
         [HttpGet("courses")]
         [Authorize(Roles = "STUDENT")]
@@ -35,21 +31,18 @@ namespace CoursesApi.Controllers.v1
 
         [HttpPost("courses")]
         [Authorize(Roles = "ADMIN")]
-        public async Task<IActionResult> AddCourse([FromBody] AddCourseDto addCourseDto)
+        public async Task<IActionResult> AddCourse([FromBody] CreateCourseCommand createCourseCommand)
         {
-            var courseDomainModel = mapper.Map<Course>(addCourseDto);
-            courseDomainModel = await courseRepository.AddCourse(courseDomainModel);
-            return Ok(mapper.Map<CourseDto>(courseDomainModel));
+            var courseId = await sender.Send(createCourseCommand);
+            return Ok($"CourseId:{courseId}");
         }
 
         [HttpPost("lecturers")]
         [Authorize(Roles = "ADMIN")]
-        public async Task<IActionResult> AddLecturer([FromBody] AddLecturerDto addLecturerDto)
+        public async Task<IActionResult> AddLecturer([FromBody] CreateLecturerCommand createLecturerCommand)
         {
-            var lecturerDomainModel = mapper.Map<Lecturer>(addLecturerDto);
-            lecturerDomainModel.Id = Guid.NewGuid();
-            lecturerDomainModel = await courseRepository.AddLecturer(mapper.Map<Lecturer>(addLecturerDto));
-            return Ok(mapper.Map<LecturerDto>(lecturerDomainModel));
+            var lecturerId = await sender.Send(createLecturerCommand);
+            return Ok($"LecturerId : {lecturerId}");
         }
     }
 }

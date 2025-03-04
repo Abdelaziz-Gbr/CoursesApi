@@ -8,41 +8,22 @@ namespace CoursesApi.Data.Repositories
     public class SqlCourseRepository : ICourseRepository
     {
         private readonly CourseDbContext dbContext;
-        private readonly IUnitOfWork unitOfWork;
 
-        public SqlCourseRepository(CourseDbContext dbContext, IUnitOfWork unitOfWork)
+        public SqlCourseRepository(CourseDbContext dbContext)
         {
             this.dbContext = dbContext;
-            this.unitOfWork = unitOfWork;
         }
-        public async Task<Course> AddCourse(Course course)
+        public async Task<Course> AddCourseAsync(Course course)
         {
-            dbContext.Courses.Add(course);
-            await unitOfWork.CompleteAsync();
+            await dbContext.Courses.AddAsync(course);
             return course;
         }
 
-        public async Task<Lecturer> AddLecturer(Lecturer lecturer)
+        public async Task<Lecturer> AddLecturerAsync(Lecturer lecturer)
         {
-            dbContext.Lecturers.Add(lecturer);
-            await unitOfWork.CompleteAsync();
+            await dbContext.Lecturers.AddAsync(lecturer);
             return lecturer;
         }
 
-        public async Task<List<Course>> GetAll()
-        {
-            return await dbContext.Courses.ToListAsync();
-
-        }
-
-        public async Task<Course?> GetById(Guid Id)
-        {
-            return await dbContext.Courses.FirstOrDefaultAsync(x => x.Id == Id);
-        }
-
-        public async Task<Course?> GetByName(string CourseName)
-        {
-            return await dbContext.Courses.FirstOrDefaultAsync(x => x.CourseName == CourseName);
-        }
     }
 }
