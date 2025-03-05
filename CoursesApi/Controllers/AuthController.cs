@@ -20,6 +20,10 @@ namespace CoursesApi.Controllers
         [Route("register")]
         public async Task<IActionResult> Register([FromForm] UserRegisterDto userRegisterDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var user = await authServices.SaveUser(userRegisterDto);
@@ -35,6 +39,10 @@ namespace CoursesApi.Controllers
         [Route("login")]
         public async Task<IActionResult> SignIn([FromForm] UserLogInDto userLogInDto)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var token = await authServices.GetUserToken(userLogInDto);

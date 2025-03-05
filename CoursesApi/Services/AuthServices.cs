@@ -1,4 +1,5 @@
 ﻿using CoursesApi.Data.Repositories;
+using CoursesApi.Data.UnitOfWork;
 using CoursesApi.Models.Data;
 using CoursesApi.Models.Dtos;
 using CoursesApi.Models.Enums;
@@ -15,11 +16,18 @@ namespace CoursesApi.Services
     {
         private readonly IAuthRepository authRepository;
         private readonly IConfiguration configuration;
+        private readonly ICourseRepository courseRepository;
+        private readonly IUnitOfWork unitOfWork;
 
-        public AuthServices(IAuthRepository authRepository, IConfiguration configuration)
+        public AuthServices(IAuthRepository authRepository, 
+            IConfiguration configuration,
+            ICourseRepository courseRepository,
+            IUnitOfWork unitOfWork)
         {
             this.authRepository = authRepository;
             this.configuration = configuration;
+            this.courseRepository = courseRepository;
+            this.unitOfWork = unitOfWork;
         }
 
         public async Task<string> GetUserToken(UserLogInDto userInfo)
@@ -47,12 +55,24 @@ namespace CoursesApi.Services
             //todo use automapper
             var user = new User
             {
+                Id = Guid.NewGuid(),
                 FullName = userRegisterDto.FullName,
                 Email = userRegisterDto.Email,
                 HashedPassword = hashedPassword,
                 Role = role
             };
             user = await authRepository.SaveAsync(user);
+
+            if (role == UserType.STUDENT) 
+            {
+                var student = new Student { 
+                    Id = user.Id,
+                    Email = user.Email,
+                    FullName = user.FullName };
+                await courseRepository.AddStudentAsync(student);
+            }
+            await unitOfWork.CompleteAsync();
+            
             return user;
         }
 

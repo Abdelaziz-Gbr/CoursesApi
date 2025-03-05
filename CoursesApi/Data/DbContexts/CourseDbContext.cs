@@ -13,8 +13,8 @@ namespace CoursesApi.Data.DbContexts
         {
             modelBuilder.Entity<StudentCourses>().Property(x => x.Finished).HasDefaultValue(false);
             modelBuilder.Entity<StudentCourses>().Property(x => x.Passed).HasDefaultValue(false);
+            modelBuilder.Entity<StudentCourses>().Property(sc => sc.Grade).HasConversion<string>();
             modelBuilder.Entity<Course>().Property(x => x.Available).HasDefaultValue(true);
-            modelBuilder.Entity<StudentCourses>().HasNoKey();
         }
         public DbSet<Course> Courses { get; set; }
         public DbSet<StudentCourses> StudentCourses { get; set; }

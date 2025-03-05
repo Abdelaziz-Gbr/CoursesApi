@@ -10,6 +10,7 @@
 
         public Guid LecturerId { get; set; }
 
+        public int CreditHours { get; set; }
 
         public Lecturer CourseLecturer { get; set; }
 

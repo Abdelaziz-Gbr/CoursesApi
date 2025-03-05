@@ -24,8 +24,7 @@ namespace CoursesApi.Data.Repositories
             {
                 throw new Exception("Error: Email is already used by another account");
             }
-            dbContext.Users.Add(user);
-            await dbContext.SaveChangesAsync();
+            await dbContext.Users.AddAsync(user);
             return user;
         }
     }

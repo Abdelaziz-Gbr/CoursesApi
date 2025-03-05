@@ -4,6 +4,7 @@ using CoursesApi.Data.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CoursesApi.Migrations
 {
     [DbContext(typeof(CourseDbContext))]
-    partial class CourseDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250304151101_refreshing snapshot")]
+    partial class refreshingsnapshot
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -36,9 +39,6 @@ namespace CoursesApi.Migrations
                     b.Property<string>("CourseName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("CreditHours")
-                        .HasColumnType("int");
 
                     b.Property<Guid>("LecturerId")
                         .HasColumnType("uniqueidentifier");
@@ -90,10 +90,6 @@ namespace CoursesApi.Migrations
 
             modelBuilder.Entity("CoursesApi.Models.Data.StudentCourses", b =>
                 {
-                    b.Property<Guid>("RegisterationId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
                     b.Property<Guid>("CourseId")
                         .HasColumnType("uniqueidentifier");
 
@@ -101,9 +97,6 @@ namespace CoursesApi.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("bit")
                         .HasDefaultValue(false);
-
-                    b.Property<string>("Grade")
-                        .HasColumnType("nvarchar(10)");
 
                     b.Property<bool>("Passed")
                         .ValueGeneratedOnAdd()
@@ -113,7 +106,8 @@ namespace CoursesApi.Migrations
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("RegisterationId");
+                    b.Property<float?>("grade")
+                        .HasColumnType("real");
 
                     b.HasIndex("CourseId");
 
