@@ -32,7 +32,10 @@ namespace CoursesApi.Data.Repositories
 
         public async Task<List<Course>> GetAllAvailableCoursesAsync()
         {
-            return await dbContext.Courses.Where(course => course.Available == true).ToListAsync();
+            return await dbContext.Courses
+                .Include(course => course.CourseLecturer)
+                .Where(course => course.Available == true)
+                .ToListAsync();
         }
 
         public async Task<List<StudentCourses>> GetPassedCoursesOfStudentAsync(Guid StudentId)

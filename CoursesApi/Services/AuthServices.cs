@@ -1,5 +1,6 @@
 ﻿using CoursesApi.Data.Repositories;
 using CoursesApi.Data.UnitOfWork;
+using CoursesApi.Mediatr.Commands;
 using CoursesApi.Models.Data;
 using CoursesApi.Models.Dtos;
 using CoursesApi.Models.Enums;
@@ -30,14 +31,15 @@ namespace CoursesApi.Services
             this.unitOfWork = unitOfWork;
         }
 
-        public async Task<string> GetUserToken(UserLogInDto userInfo)
+        public async Task<string> GetUserToken(string Email, string Password)
         {
-            var userDomain = await authRepository.GetUserByEmail(userInfo.Email);
+            var userDomain = await authRepository.GetUserByEmail(Email);
             if (userDomain == null) 
             {
                 throw new Exception("User Not Found");
             }
-            if (!VerifyPassword(userInfo.Password, userDomain.HashedPassword)) 
+
+            if (!VerifyPassword(Password, userDomain.HashedPassword)) 
             {
                 throw new Exception("Password Incorrect");
             }
@@ -45,25 +47,27 @@ namespace CoursesApi.Services
             return $"key:{GenerateJwtToken(userDomain)}";
         }
 
-        public async Task<User> SaveUser(UserRegisterDto userRegisterDto)
+        public async Task<User> SaveUser(CreateUserCommand createUserCommand)
         {
-            var hashedPassword = HashPassword(userRegisterDto.Password);
-            if (!Enum.TryParse<UserType>(userRegisterDto.Role, true, out var role))
+            var hashedPassword = HashPassword(createUserCommand.Password);
+
+           /* if (!Enum.TryParse<UserType>(userRegisterDto.Role, true, out var role))
             {
                 throw new Exception("Invalid User Type");
-            }
+            }*/
+
             //todo use automapper
             var user = new User
             {
                 Id = Guid.NewGuid(),
-                FullName = userRegisterDto.FullName,
-                Email = userRegisterDto.Email,
+                FullName = createUserCommand.FullName,
+                Email = createUserCommand.Email,
                 HashedPassword = hashedPassword,
-                Role = role
+                Role = createUserCommand.Role
             };
             user = await authRepository.SaveAsync(user);
 
-            if (role == UserType.STUDENT) 
+            if (createUserCommand.Role == UserType.STUDENT) 
             {
                 var student = new Student { 
                     Id = user.Id,

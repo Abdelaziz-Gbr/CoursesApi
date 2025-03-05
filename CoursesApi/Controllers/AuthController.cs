@@ -1,6 +1,9 @@
-﻿using CoursesApi.Models.Dtos;
+﻿using CoursesApi.Mediatr.Commands;
+using CoursesApi.Mediatr.Queries;
+using CoursesApi.Models.Dtos;
 using CoursesApi.Models.Enums;
 using CoursesApi.Services;
+using MediatR;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -10,15 +13,15 @@ namespace CoursesApi.Controllers
     [ApiController]
     public class AuthController : ControllerBase
     {
-        private readonly IAuthServices authServices;
+        private readonly ISender sender;
 
-        public AuthController(IAuthServices authServices)
+        public AuthController(ISender sender)
         {
-            this.authServices = authServices;
+            this.sender = sender;
         }
         [HttpPost]
         [Route("register")]
-        public async Task<IActionResult> Register([FromForm] UserRegisterDto userRegisterDto)
+        public async Task<IActionResult> Register([FromForm] CreateUserCommand createUserCommand)
         {
             if (!ModelState.IsValid)
             {
@@ -26,18 +29,25 @@ namespace CoursesApi.Controllers
             }
             try
             {
-                var user = await authServices.SaveUser(userRegisterDto);
+                var userCreated = await sender.Send(createUserCommand);
+                if(userCreated)
+                {
+                    return Ok("user created succesfully please login.");
+                }
+                else
+                {
+                    return BadRequest("Invalid input");
+                }
             }
             catch (Exception ex) 
             {
                 return BadRequest(ex.Message);
             }
-            return Ok("user created succesfully please login.");
         }
 
         [HttpPost]
         [Route("login")]
-        public async Task<IActionResult> SignIn([FromForm] UserLogInDto userLogInDto)
+        public async Task<IActionResult> SignIn([FromForm] SignUserInQuery userCreds)
         {
             if (!ModelState.IsValid)
             {
@@ -45,12 +55,16 @@ namespace CoursesApi.Controllers
             }
             try
             {
-                var token = await authServices.GetUserToken(userLogInDto);
+                var token = await sender.Send(userCreds);
+                if(token == null)
+                {
+                    return ValidationProblem("invalid credentials");
+                }
                 return Ok(token);
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.Message);
+                return ValidationProblem(ex.Message);
             }
         }
     }

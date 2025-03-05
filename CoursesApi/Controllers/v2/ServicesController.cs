@@ -12,13 +12,13 @@ namespace CoursesApi.Controllers.v2
     public class ServicesController : ControllerBase
     {
         [HttpGet("courses")]
-        public IActionResult GetAllAvailableCourses()
+        public IActionResult GetAllAvailableCoursesv2()
         {
             return BadRequest("not yet handled");
         }
 
         [HttpPost("courses")]
-        public async Task<IActionResult> AddCourse(AddCourseDto? addCourseDto)
+        public async Task<IActionResult> AddCoursev2(AddCourseDto? addCourseDto)
         {
             return BadRequest("to be made.");
         }
